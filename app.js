@@ -7,6 +7,7 @@ import {AuthRoutes} from './routes/AuthRoutes.js'
 import {ProjectRoutes} from "./routes/ProjectRoutes.js";
 import {OrgRoutes} from "./routes/OrgRoutes.js";
 import {IssueRoutes} from "./routes/IssueRoutes.js";
+import cors from 'cors'
 
 dotenv.config();
 
@@ -14,6 +15,9 @@ dotenv.config();
 const app = express();
 const PORT = 8000;
 app.use(express.json());
+
+// cors
+app.use(cors)
 
 // db connection
 createConn()
