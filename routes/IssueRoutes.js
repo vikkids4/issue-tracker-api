@@ -5,7 +5,7 @@ import {
     createIssue,
     fetchIssues,
     updateIssue,
-    deleteIssue, createIssueComment, fetchIssueComments
+    deleteIssue, createIssueComment, fetchIssueComments, updateIssueStatus
 } from '../controllers/IssueController.js'
 
 export const IssueRoutes = express.Router();
@@ -16,5 +16,6 @@ IssueRoutes.post('', createIssue)
 IssueRoutes.get('', fetchIssues)
 IssueRoutes.put('', updateIssue)
 IssueRoutes.delete('', deleteIssue)
+IssueRoutes.put('/status/update', updateIssueStatus)
 IssueRoutes.post('/comments', createIssueComment)
 IssueRoutes.get('/comments', fetchIssueComments)

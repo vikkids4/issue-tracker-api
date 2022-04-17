@@ -7,7 +7,9 @@ import {AuthRoutes} from './routes/AuthRoutes.js'
 import {ProjectRoutes} from "./routes/ProjectRoutes.js";
 import {OrgRoutes} from "./routes/OrgRoutes.js";
 import {IssueRoutes} from "./routes/IssueRoutes.js";
+import {InvoiceRoutes} from "./routes/InvoiceRoutes.js";
 import cors from 'cors'
+import {ReportRoutes} from "./routes/ReportRoutes.js";
 
 dotenv.config();
 
@@ -17,7 +19,7 @@ const PORT = 8000;
 app.use(express.json());
 
 // cors
-app.use(cors)
+app.use(cors())
 
 // db connection
 createConn()
@@ -30,6 +32,8 @@ app.use('/api/auth', AuthRoutes)
 app.use('/api/projects', ProjectRoutes)
 app.use('/api/organizations', OrgRoutes)
 app.use('/api/issues', IssueRoutes)
+app.use('/api/invoices', InvoiceRoutes)
+app.use('/api/reports', ReportRoutes)
 
 // test
 // let conn = getConn()

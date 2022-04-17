@@ -1,6 +1,7 @@
 import {validate} from "../helpers/TokenHelper.js";
 import {errorHandler} from "../handlers/ErrorHandler.js";
 import {getConn} from "../configs/DbConfig.js";
+import {createInvoice} from "./InvoiceController.js";
 
 let query
 let conn = getConn()
@@ -25,7 +26,6 @@ export const fetchIssueStatus = (req,res,next) => {
             console.log('[DB Error] ' + err)
             errorHandler(err.message,req,res,400)
         } else {
-            console.log(results)
             res.status(200).json(results)
         }
     })
@@ -51,13 +51,11 @@ export const createIssue = (req,res,next) => {
     query = `INSERT INTO ISSUES(TITLE,DESCRIPTION,TYPE_ID,STATUS_ID,PROJECT_ID,CREATED_BY,CREATED_AT) 
                     VALUES('${issue.title}','${issue.description}',${issue.typeId},${issue.statusId},${issue.createdBy},
                     ${issue.projectId},${issue.createdAt})`
-    console.log(query)
     conn.query(query, (err, results) => {
         if (err) {
             console.log('[DB Error] ' + err)
             errorHandler(err.message,req,res,400)
         } else {
-            console.log(results)
             res.status(201).send('Issue created')
         }
     })
@@ -71,6 +69,7 @@ export const updateIssue = (req,res,next) => {
     }
 
     let issue = {
+        id: req.body.issueId,
         title: req.body.title,
         description: req.body.description,
         typeId: req.body.typeId,
@@ -85,7 +84,7 @@ export const updateIssue = (req,res,next) => {
             DESCRIPTION=${issue.description},
             TYPE_ID=${issue.typeId},
             STATUS_ID=${issue.statusId},
-            PROJECT_ID=${issue.projectId}`
+            PROJECT_ID=${issue.projectId} WHERE ID=${issueId.id} IS_DELETED=false`
 
     conn.query(query, (err, results) => {
         if (err) {
@@ -151,6 +150,44 @@ export const fetchIssues = (req,res,next) => {
         } else {
             console.log(results)
             res.status(200).json(results)
+        }
+    })
+}
+
+export const updateIssueStatus = (req,res,next) => {
+    let token = req.headers['token']
+    let tokenData = validate(token)
+    if (token == null && token === undefined) {
+        errorHandler('Unauthenticated', req, res, 401)
+    }
+    let manHours = null
+
+    let issue = {
+        id: req.body.issueId,
+        statusId: req.body.statusId,
+        manHours: req.body.manHours
+    };
+
+    if (issue.statusId === 4) {
+        // issue closed status handling
+        query = `UPDATE ISSUES SET STATUS_ID=${issue.statusId}, CLOSED_AT=${Math.round(Date.now() / 1000)} WHERE ID=${issue.id}`
+        if (issue.manHours != null) {
+            manHours = issue.manHours
+        }
+    } else {
+        query = `UPDATE ISSUES SET STATUS_ID=${issue.statusId} WHERE ID=${issue.id}`
+    }
+
+    conn.query(query, (err, results) => {
+        if (err) {
+            console.log('[DB Error] ' + err)
+            errorHandler(err.message,req,res,400)
+        } else {
+            if (issue.statusId === 4) {
+                createInvoice(issue.id, manHours)
+            }
+            console.log(results)
+            res.status(200).send('Issue updated')
         }
     })
 }
